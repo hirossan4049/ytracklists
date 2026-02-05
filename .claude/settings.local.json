@@ -6,7 +6,11 @@
       "WebFetch(domain:greasyfork.org)",
       "WebFetch(domain:1001tracklist-api.azurewebsites.net)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(convert:*)"
+      "Bash(convert:*)",
+      "Bash(wc:*)",
+      "WebFetch(domain:wxt.dev)",
+      "Bash(npm install:*)",
+      "Bash(npx wxt build:*)"
     ]
   }
 }

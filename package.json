@@ -1,0 +1,19 @@
+{
+  "name": "youtube-tracklists",
+  "version": "1.0.0",
+  "description": "Find and display 1001tracklists data on YouTube DJ set videos",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt --browser firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build --browser firefox",
+    "zip": "wxt zip",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "wxt": "^0.19.0",
+    "typescript": "^5.7.0"
+  }
+}
