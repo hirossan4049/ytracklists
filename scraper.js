@@ -44,7 +44,9 @@
       const cueEl =
         row.querySelector('.cueValueField') ||
         row.querySelector('.cueVal') ||
-        row.querySelector('.cueI');
+        row.querySelector('.cueI') ||
+        row.querySelector('.time') ||
+        row.querySelector('[class*="cue"]');
       const timestamp = cueEl ? cueEl.textContent.trim() : '';
 
       const numberEl = row.querySelector('[id$="_tracknumber_value"]');
