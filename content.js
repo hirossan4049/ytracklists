@@ -17,15 +17,70 @@ function handlePageChange() {
   tracklistData = null;
   panelVisible = false;
 
-  waitForElement('#above-the-fold #title h1 yt-formatted-string', 3000)
-    .then(titleEl => {
-      const title = titleEl.textContent.trim();
-      if (!title) return;
+  // First try to find a 1001tracklists URL in the description
+  findDescriptionUrl().then(found => {
+    if (found) return;
 
-      const query = cleanTitle(title);
-      return searchForTracklist(query);
-    })
-    .catch(() => {});
+    // Fallback: search by title
+    waitForElement('#above-the-fold #title h1 yt-formatted-string', 3000)
+      .then(titleEl => {
+        const title = titleEl.textContent.trim();
+        if (!title) return;
+
+        const query = cleanTitle(title);
+        return searchForTracklist(query);
+      })
+      .catch(() => {});
+  });
+}
+
+async function findDescriptionUrl() {
+  try {
+    // Wait for the description to be in the DOM
+    const descEl = await waitForElement(
+      'ytd-watch-metadata #description-inner, ytd-video-secondary-info-renderer #description, #meta #description',
+      3000
+    );
+
+    // Look for 1001tracklists links in the description
+    const links = descEl.querySelectorAll('a[href*="1001tracklists.com/tracklist/"]');
+    if (links.length > 0) {
+      const url = links[0].href;
+      const name = extractTracklistName(url);
+      tracklistData = { results: [{ name, url }], selected: null, tracks: null, name: null, url: null };
+      injectButton();
+      return true;
+    }
+
+    // Also check the raw text for URLs (some descriptions have unlinked URLs)
+    const text = descEl.textContent || '';
+    const match = text.match(/https?:\/\/(?:www\.)?1001tracklists\.com\/tracklist\/[^\s)}\]]+/);
+    if (match) {
+      const url = match[0];
+      const name = extractTracklistName(url);
+      tracklistData = { results: [{ name, url }], selected: null, tracks: null, name: null, url: null };
+      injectButton();
+      return true;
+    }
+  } catch (err) {
+    // Description not found, continue to title search
+  }
+  return false;
+}
+
+function extractTracklistName(url) {
+  try {
+    const path = new URL(url).pathname;
+    // /tracklist/XXXX/slug-name.html -> slug-name
+    const parts = path.split('/');
+    const slug = parts[parts.length - 1] || parts[parts.length - 2] || '';
+    return slug
+      .replace(/\.html$/, '')
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+  } catch {
+    return 'Tracklist';
+  }
 }
 
 function getVideoId() {
