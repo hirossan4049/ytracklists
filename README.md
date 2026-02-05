@@ -1,14 +1,12 @@
 # YouTube Tracklists
 
-YouTube の DJ セット動画に [1001Tracklists](https://www.1001tracklists.com/) のトラックリストを表示する Chrome 拡張。
+YouTubeのDJセット動画に [1001Tracklists](https://www.1001tracklists.com/) のトラックリストを表示するChrome拡張。
 
 ## 機能
 
 - 動画ページに「1001」ボタンを表示
 - クリックで概要欄の URL or タイトル検索からトラックリストを取得・表示
 - タイムスタンプクリックでその時間にジャンプ
-- YouTube のライト/ダークテーマに対応
-- `1001.tl` 短縮 URL にも対応
 
 ## 開発
 
@@ -39,3 +37,8 @@ src/
 ```
 
 WXT + TypeScript。
+
+## demo
+
+![demo](./docs/ex1.jpeg)
+![demo](./docs/ex2.jpeg)
