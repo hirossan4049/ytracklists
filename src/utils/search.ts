@@ -40,15 +40,19 @@ export async function findDescriptionUrl(): Promise<TracklistState | null> {
       3000
     );
 
-    const links = descEl.querySelectorAll('a[href*="1001tracklists.com/tracklist/"]');
+    // Check for full 1001tracklists.com URLs in <a> tags
+    const links = descEl.querySelectorAll('a[href*="1001tracklists.com/tracklist/"], a[href*="1001.tl/"]');
     if (links.length > 0) {
       const url = (links[0] as HTMLAnchorElement).href;
       const name = extractTracklistName(url);
       return { results: [{ name, url }], selected: null, tracks: null, name: null, url: null };
     }
 
+    // Check for URLs in plain text (both full and short)
     const text = descEl.textContent || '';
-    const match = text.match(/https?:\/\/(?:www\.)?1001tracklists\.com\/tracklist\/[^\s)}\]]+/);
+    const match = text.match(
+      /https?:\/\/(?:(?:www\.)?1001tracklists\.com\/tracklist\/[^\s)}\]]+|1001\.tl\/[^\s)}\]]+)/
+    );
     if (match) {
       const url = match[0];
       const name = extractTracklistName(url);

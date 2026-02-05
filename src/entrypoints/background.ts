@@ -18,7 +18,8 @@ export default defineBackground({
       }
 
       if (message.type === MSG.FETCH_TRACKLIST) {
-        fetchTracklist(message.url, pendingRequests)
+        resolveShortUrl(message.url)
+          .then(url => fetchTracklist(url, pendingRequests))
           .then(tracks => sendResponse({ success: true, tracks }))
           .catch(err => sendResponse({ success: false, error: (err as Error).message }));
         return true;
@@ -36,6 +37,16 @@ export default defineBackground({
     });
   },
 });
+
+async function resolveShortUrl(url: string): Promise<string> {
+  if (!url.includes('1001.tl/')) return url;
+  try {
+    const response = await fetch(url, { redirect: 'follow' });
+    return response.url;
+  } catch {
+    return url;
+  }
+}
 
 async function searchTracklists(query: string) {
   const url = 'https://www.1001tracklists.com/ajax/search_tracklist.php'
