@@ -10,10 +10,12 @@
     "build": "wxt build",
     "build:firefox": "wxt build --browser firefox",
     "zip": "wxt zip",
+    "lint": "oxlint src/",
     "postinstall": "wxt prepare"
   },
   "devDependencies": {
-    "wxt": "^0.19.0",
-    "typescript": "^5.7.0"
+    "oxlint": "^1.43.0",
+    "typescript": "^5.7.0",
+    "wxt": "^0.19.0"
   }
 }

@@ -10,7 +10,8 @@
       "Bash(wc:*)",
       "WebFetch(domain:wxt.dev)",
       "Bash(npm install:*)",
-      "Bash(npx wxt build:*)"
+      "Bash(npx wxt build:*)",
+      "Bash(npx oxlint:*)"
     ]
   }
 }
