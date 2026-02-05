@@ -12,7 +12,6 @@ let panelVisible = false;
 
 export function handlePageChange(): void {
   const videoId = getVideoId();
-  console.log('[YT-Tracklists] handlePageChange, videoId:', videoId, 'current:', currentVideoId);
   if (!videoId || videoId === currentVideoId) return;
 
   currentVideoId = videoId;
@@ -21,37 +20,13 @@ export function handlePageChange(): void {
   tracklistData = null;
   panelVisible = false;
 
-  findDescriptionUrl().then(state => {
-    console.log('[YT-Tracklists] descriptionUrl result:', state);
-    if (state) {
-      tracklistData = state;
-      injectButton();
-      return;
-    }
-
-    waitForElement('#above-the-fold #title h1 yt-formatted-string', 3000)
-      .then(titleEl => {
-        const title = (titleEl as HTMLElement).textContent?.trim();
-        if (!title) return;
-
-        const query = cleanTitle(title);
-        console.log('[YT-Tracklists] searching:', query);
-        return searchForTracklist(query).then(results => {
-          console.log('[YT-Tracklists] search results:', results);
-          if (results) {
-            tracklistData = { results, selected: null, tracks: null, name: null, url: null };
-            injectButton();
-          }
-        });
-      })
-      .catch(err => console.log('[YT-Tracklists] title search error:', err));
-  });
+  injectButton();
 }
 
 function injectButton(): void {
   removeButton();
 
-  waitForElement('#owner', 3000).then(owner => {
+  waitForElement('#owner', 5000).then(owner => {
     buttonElement = document.createElement('button');
     buttonElement.id = 'ytl-btn';
     buttonElement.textContent = '1001';
@@ -68,8 +43,7 @@ function removeButton(): void {
   }
 }
 
-function togglePanel(): void {
-  console.log('[YT-Tracklists] togglePanel, visible:', panelVisible, 'data:', tracklistData);
+async function togglePanel(): Promise<void> {
   if (panelVisible) {
     removePanel();
     panelVisible = false;
@@ -78,28 +52,69 @@ function togglePanel(): void {
 
   panelVisible = true;
 
-  if (!tracklistData) {
-    console.log('[YT-Tracklists] no tracklistData!');
+  // Already have tracks cached — show immediately
+  if (tracklistData?.tracks) {
+    showPanel('tracklist', { name: tracklistData.name!, tracks: tracklistData.tracks, url: tracklistData.url! });
     return;
   }
 
-  if (tracklistData.tracks) {
-    showPanel('tracklist', { name: tracklistData.name!, tracks: tracklistData.tracks, url: tracklistData.url! });
-  } else if (tracklistData.results.length === 1) {
-    console.log('[YT-Tracklists] fetching single result:', tracklistData.results[0]);
-    fetchAndShowTracklist(tracklistData.results[0]);
-  } else {
-    showPanel('results', tracklistData.results);
+  // Already have search results cached — show list or fetch single
+  if (tracklistData?.results) {
+    if (tracklistData.results.length === 1) {
+      fetchAndShowTracklist(tracklistData.results[0]);
+    } else {
+      showPanel('results', tracklistData.results);
+    }
+    return;
+  }
+
+  // First click — search from scratch
+  showPanel('loading');
+  await searchAndShow();
+}
+
+async function searchAndShow(): Promise<void> {
+  // 1. Check description for 1001tracklists URL
+  const descState = await findDescriptionUrl();
+  if (descState) {
+    tracklistData = descState;
+    fetchAndShowTracklist(descState.results[0]);
+    return;
+  }
+
+  // 2. Fall back to title search
+  try {
+    const titleEl = await waitForElement('#above-the-fold #title h1 yt-formatted-string', 3000);
+    const title = (titleEl as HTMLElement).textContent?.trim();
+    if (!title) {
+      showPanel('error', 'Could not find video title');
+      return;
+    }
+
+    const query = cleanTitle(title);
+    const results = await searchForTracklist(query);
+    if (!results || results.length === 0) {
+      showPanel('error', 'No tracklist found');
+      return;
+    }
+
+    tracklistData = { results, selected: null, tracks: null, name: null, url: null };
+
+    if (results.length === 1) {
+      fetchAndShowTracklist(results[0]);
+    } else {
+      showPanel('results', results);
+    }
+  } catch {
+    showPanel('error', 'No tracklist found');
   }
 }
 
 async function fetchAndShowTracklist(result: SearchResult): Promise<void> {
-  console.log('[YT-Tracklists] fetchAndShowTracklist:', result.url);
   showPanel('loading');
 
   try {
     const response = await sendFetchMessage(result.url);
-    console.log('[YT-Tracklists] fetchResponse:', response);
 
     if (!response.success || !response.tracks || !response.tracks.length) {
       showPanel('error', 'Could not load tracklist');
@@ -127,19 +142,10 @@ function ensurePanel(): void {
   panelElement.id = 'yt-tracklist-panel';
 
   const secondary = document.querySelector('#secondary');
-  console.log('[YT-Tracklists] ensurePanel, #secondary:', secondary);
   if (secondary) {
     secondary.prepend(panelElement);
-  } else {
-    console.log('[YT-Tracklists] #secondary not found!');
   }
 }
-
-type PanelData =
-  | { state: 'loading' }
-  | { state: 'error'; message: string }
-  | { state: 'results'; results: SearchResult[] }
-  | { state: 'tracklist'; data: { name: string; tracks: import('./types').Track[]; url: string } };
 
 function showPanel(state: 'loading'): void;
 function showPanel(state: 'error', message: string): void;
