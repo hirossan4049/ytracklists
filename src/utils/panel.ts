@@ -12,6 +12,7 @@ let panelVisible = false;
 
 export function handlePageChange(): void {
   const videoId = getVideoId();
+  console.log('[YT-Tracklists] handlePageChange, videoId:', videoId, 'current:', currentVideoId);
   if (!videoId || videoId === currentVideoId) return;
 
   currentVideoId = videoId;
@@ -21,6 +22,7 @@ export function handlePageChange(): void {
   panelVisible = false;
 
   findDescriptionUrl().then(state => {
+    console.log('[YT-Tracklists] descriptionUrl result:', state);
     if (state) {
       tracklistData = state;
       injectButton();
@@ -33,14 +35,16 @@ export function handlePageChange(): void {
         if (!title) return;
 
         const query = cleanTitle(title);
+        console.log('[YT-Tracklists] searching:', query);
         return searchForTracklist(query).then(results => {
+          console.log('[YT-Tracklists] search results:', results);
           if (results) {
             tracklistData = { results, selected: null, tracks: null, name: null, url: null };
             injectButton();
           }
         });
       })
-      .catch(() => {});
+      .catch(err => console.log('[YT-Tracklists] title search error:', err));
   });
 }
 
@@ -65,6 +69,7 @@ function removeButton(): void {
 }
 
 function togglePanel(): void {
+  console.log('[YT-Tracklists] togglePanel, visible:', panelVisible, 'data:', tracklistData);
   if (panelVisible) {
     removePanel();
     panelVisible = false;
@@ -73,11 +78,15 @@ function togglePanel(): void {
 
   panelVisible = true;
 
-  if (!tracklistData) return;
+  if (!tracklistData) {
+    console.log('[YT-Tracklists] no tracklistData!');
+    return;
+  }
 
   if (tracklistData.tracks) {
     showPanel('tracklist', { name: tracklistData.name!, tracks: tracklistData.tracks, url: tracklistData.url! });
   } else if (tracklistData.results.length === 1) {
+    console.log('[YT-Tracklists] fetching single result:', tracklistData.results[0]);
     fetchAndShowTracklist(tracklistData.results[0]);
   } else {
     showPanel('results', tracklistData.results);
@@ -85,10 +94,12 @@ function togglePanel(): void {
 }
 
 async function fetchAndShowTracklist(result: SearchResult): Promise<void> {
+  console.log('[YT-Tracklists] fetchAndShowTracklist:', result.url);
   showPanel('loading');
 
   try {
     const response = await sendFetchMessage(result.url);
+    console.log('[YT-Tracklists] fetchResponse:', response);
 
     if (!response.success || !response.tracks || !response.tracks.length) {
       showPanel('error', 'Could not load tracklist');
@@ -116,8 +127,11 @@ function ensurePanel(): void {
   panelElement.id = 'yt-tracklist-panel';
 
   const secondary = document.querySelector('#secondary');
+  console.log('[YT-Tracklists] ensurePanel, #secondary:', secondary);
   if (secondary) {
     secondary.prepend(panelElement);
+  } else {
+    console.log('[YT-Tracklists] #secondary not found!');
   }
 }
 
