@@ -3,7 +3,7 @@
   "name": "YouTube Tracklists",
   "version": "1.0.0",
   "description": "Find and display 1001tracklists data on YouTube DJ set videos",
-  "permissions": [],
+  "permissions": ["tabs"],
   "host_permissions": [
     "https://www.1001tracklists.com/*"
   ],
@@ -15,6 +15,11 @@
       "matches": ["https://www.youtube.com/*"],
       "js": ["content.js"],
       "css": ["tracklist.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.1001tracklists.com/tracklist/*"],
+      "js": ["scraper.js"],
       "run_at": "document_idle"
     }
   ],

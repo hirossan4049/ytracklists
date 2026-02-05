@@ -106,11 +106,21 @@ function waitForElement(selector, timeout = 5000) {
   });
 }
 
-function showPanel(state, data) {
-  removePanel();
+function ensurePanel() {
+  if (panelElement && panelElement.parentNode) return;
+  if (panelElement) panelElement.remove();
 
   panelElement = document.createElement('div');
   panelElement.id = 'yt-tracklist-panel';
+
+  const secondary = document.querySelector('#secondary');
+  if (secondary) {
+    secondary.prepend(panelElement);
+  }
+}
+
+function showPanel(state, data) {
+  ensurePanel();
 
   switch (state) {
     case 'loading':
@@ -176,11 +186,6 @@ function showPanel(state, data) {
   const closeBtn = panelElement.querySelector('.ytl-close');
   if (closeBtn) {
     closeBtn.addEventListener('click', removePanel);
-  }
-
-  const secondary = document.querySelector('#secondary');
-  if (secondary) {
-    secondary.prepend(panelElement);
   }
 }
 
