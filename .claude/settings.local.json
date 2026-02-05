@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.1001tracklists.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:greasyfork.org)",
+      "WebFetch(domain:1001tracklist-api.azurewebsites.net)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(convert:*)"
+    ]
+  }
+}

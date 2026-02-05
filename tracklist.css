@@ -1,0 +1,169 @@
+/* Light theme (default) */
+#yt-tracklist-panel {
+  background: var(--yt-spec-brand-background-primary, #fff);
+  border: 1px solid var(--yt-spec-10-percent-layer, #e0e0e0);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  font-family: 'Roboto', Arial, sans-serif;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+}
+
+.ytl-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--yt-spec-10-percent-layer, #e0e0e0);
+}
+
+.ytl-title {
+  font-size: 16px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.ytl-link {
+  font-size: 12px;
+  color: var(--yt-spec-call-to-action, #065fd4);
+  text-decoration: none;
+  margin-right: 12px;
+}
+
+.ytl-link:hover {
+  text-decoration: underline;
+}
+
+.ytl-close {
+  background: none;
+  border: none;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.ytl-loading {
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--yt-spec-text-secondary, #606060);
+}
+
+.ytl-name {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--yt-spec-text-secondary, #606060);
+  border-bottom: 1px solid var(--yt-spec-10-percent-layer, #e0e0e0);
+}
+
+.ytl-results-label {
+  padding: 8px 16px 4px;
+  font-size: 13px;
+  color: var(--yt-spec-text-secondary, #606060);
+}
+
+.ytl-results {
+  padding: 4px 0;
+}
+
+.ytl-result {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.ytl-result:hover {
+  background: var(--yt-spec-10-percent-layer, #f2f2f2);
+}
+
+.ytl-tracks {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ytl-track {
+  display: flex;
+  align-items: baseline;
+  padding: 6px 16px;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.ytl-track:hover {
+  background: var(--yt-spec-10-percent-layer, #f2f2f2);
+}
+
+.ytl-track-num {
+  color: var(--yt-spec-text-secondary, #606060);
+  min-width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.ytl-track-time {
+  color: var(--yt-spec-call-to-action, #065fd4);
+  min-width: 48px;
+  flex-shrink: 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+}
+
+.ytl-track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ytl-track-artist {
+  font-weight: 500;
+}
+
+.ytl-track-title {
+  color: var(--yt-spec-text-secondary, #606060);
+}
+
+/* Dark theme override */
+html[dark] #yt-tracklist-panel {
+  background: var(--yt-spec-brand-background-primary, #0f0f0f);
+  border-color: var(--yt-spec-10-percent-layer, #3f3f3f);
+  color: var(--yt-spec-text-primary, #f1f1f1);
+}
+
+html[dark] .ytl-header {
+  border-bottom-color: var(--yt-spec-10-percent-layer, #3f3f3f);
+}
+
+html[dark] .ytl-link {
+  color: var(--yt-spec-call-to-action, #3ea6ff);
+}
+
+html[dark] .ytl-close {
+  color: var(--yt-spec-text-primary, #f1f1f1);
+}
+
+html[dark] .ytl-loading,
+html[dark] .ytl-results-label {
+  color: var(--yt-spec-text-secondary, #aaa);
+}
+
+html[dark] .ytl-name {
+  color: var(--yt-spec-text-secondary, #aaa);
+  border-bottom-color: var(--yt-spec-10-percent-layer, #3f3f3f);
+}
+
+html[dark] .ytl-result:hover,
+html[dark] .ytl-track:hover {
+  background: var(--yt-spec-10-percent-layer, #272727);
+}
+
+html[dark] .ytl-track-num {
+  color: var(--yt-spec-text-secondary, #aaa);
+}
+
+html[dark] .ytl-track-time {
+  color: var(--yt-spec-call-to-action, #3ea6ff);
+}
+
+html[dark] .ytl-track-title {
+  color: var(--yt-spec-text-secondary, #aaa);
+}
