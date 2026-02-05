@@ -1,3 +1,32 @@
+/* 1001 Button next to subscribe */
+#ytl-btn {
+  margin-left: 8px;
+  padding: 0 16px;
+  height: 36px;
+  border: none;
+  border-radius: 18px;
+  background: var(--yt-spec-badge-chip-background, #272727);
+  color: var(--yt-spec-text-primary, #f1f1f1);
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#ytl-btn:hover {
+  background: var(--yt-spec-button-chip-background-hover, #3f3f3f);
+}
+
+html:not([dark]) #ytl-btn {
+  background: var(--yt-spec-badge-chip-background, #f2f2f2);
+  color: var(--yt-spec-text-primary, #0f0f0f);
+}
+
+html:not([dark]) #ytl-btn:hover {
+  background: var(--yt-spec-button-chip-background-hover, #e5e5e5);
+}
+
 /* Light theme (default) */
 #yt-tracklist-panel {
   background: var(--yt-spec-brand-background-primary, #fff);

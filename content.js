@@ -1,5 +1,8 @@
 let currentVideoId = null;
 let panelElement = null;
+let buttonElement = null;
+let tracklistData = null; // { results, selected, tracks, name, url }
+let panelVisible = false;
 
 handlePageChange();
 document.addEventListener('yt-navigate-finish', handlePageChange);
@@ -10,6 +13,9 @@ function handlePageChange() {
 
   currentVideoId = videoId;
   removePanel();
+  removeButton();
+  tracklistData = null;
+  panelVisible = false;
 
   waitForElement('#above-the-fold #title h1 yt-formatted-string', 3000)
     .then(titleEl => {
@@ -17,8 +23,7 @@ function handlePageChange() {
       if (!title) return;
 
       const query = cleanTitle(title);
-      showPanel('loading');
-      return searchAndDisplay(query);
+      return searchForTracklist(query);
     })
     .catch(() => {});
 }
@@ -40,7 +45,7 @@ function cleanTitle(title) {
     .trim();
 }
 
-async function searchAndDisplay(query) {
+async function searchForTracklist(query) {
   try {
     const searchResponse = await chrome.runtime.sendMessage({
       type: 'SEARCH_TRACKLIST',
@@ -48,19 +53,53 @@ async function searchAndDisplay(query) {
     });
 
     if (!searchResponse.success || !searchResponse.results || !searchResponse.results.length) {
-      removePanel();
       return;
     }
 
-    const results = searchResponse.results;
-
-    if (results.length === 1) {
-      await fetchAndShowTracklist(results[0]);
-    } else {
-      showPanel('results', results);
-    }
+    tracklistData = { results: searchResponse.results, selected: null, tracks: null, name: null, url: null };
+    injectButton();
   } catch (err) {
+    // No results, no button
+  }
+}
+
+// --- Button ---
+
+function injectButton() {
+  removeButton();
+
+  waitForElement('#owner', 3000).then(owner => {
+    buttonElement = document.createElement('button');
+    buttonElement.id = 'ytl-btn';
+    buttonElement.textContent = '1001';
+    buttonElement.title = 'Show tracklist from 1001Tracklists';
+    buttonElement.addEventListener('click', togglePanel);
+    owner.appendChild(buttonElement);
+  }).catch(() => {});
+}
+
+function removeButton() {
+  if (buttonElement) {
+    buttonElement.remove();
+    buttonElement = null;
+  }
+}
+
+function togglePanel() {
+  if (panelVisible) {
     removePanel();
+    panelVisible = false;
+    return;
+  }
+
+  panelVisible = true;
+
+  if (tracklistData.tracks) {
+    showPanel('tracklist', { name: tracklistData.name, tracks: tracklistData.tracks, url: tracklistData.url });
+  } else if (tracklistData.results.length === 1) {
+    fetchAndShowTracklist(tracklistData.results[0]);
+  } else {
+    showPanel('results', tracklistData.results);
   }
 }
 
@@ -74,15 +113,22 @@ async function fetchAndShowTracklist(result) {
     });
 
     if (!response.success || !response.tracks || !response.tracks.length) {
-      removePanel();
+      showPanel('error', 'Could not load tracklist');
       return;
     }
 
+    tracklistData.selected = result;
+    tracklistData.tracks = response.tracks;
+    tracklistData.name = result.name;
+    tracklistData.url = result.url;
+
     showPanel('tracklist', { name: result.name, tracks: response.tracks, url: result.url });
   } catch (err) {
-    removePanel();
+    showPanel('error', err.message);
   }
 }
+
+// --- DOM helpers ---
 
 function waitForElement(selector, timeout = 5000) {
   return new Promise((resolve, reject) => {
@@ -106,6 +152,8 @@ function waitForElement(selector, timeout = 5000) {
   });
 }
 
+// --- Panel ---
+
 function ensurePanel() {
   if (panelElement && panelElement.parentNode) return;
   if (panelElement) panelElement.remove();
@@ -127,8 +175,19 @@ function showPanel(state, data) {
       panelElement.innerHTML = `
         <div class="ytl-header">
           <span class="ytl-title">1001Tracklists</span>
+          <button class="ytl-close" title="Close">&times;</button>
         </div>
-        <div class="ytl-loading">Searching for tracklist...</div>
+        <div class="ytl-loading">Loading tracklist...</div>
+      `;
+      break;
+
+    case 'error':
+      panelElement.innerHTML = `
+        <div class="ytl-header">
+          <span class="ytl-title">1001Tracklists</span>
+          <button class="ytl-close" title="Close">&times;</button>
+        </div>
+        <div class="ytl-loading">${escapeHtml(data)}</div>
       `;
       break;
 
@@ -197,7 +256,10 @@ function showPanel(state, data) {
 
   const closeBtn = panelElement.querySelector('.ytl-close');
   if (closeBtn) {
-    closeBtn.addEventListener('click', removePanel);
+    closeBtn.addEventListener('click', () => {
+      removePanel();
+      panelVisible = false;
+    });
   }
 }
 
@@ -207,6 +269,8 @@ function removePanel() {
     panelElement = null;
   }
 }
+
+// --- Utilities ---
 
 function escapeHtml(str) {
   if (!str) return '';
